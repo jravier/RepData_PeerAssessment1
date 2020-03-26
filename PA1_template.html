@@ -386,11 +386,8 @@ activityDS&lt;-read_csv(&quot;activity.zip&quot;)</code></pre>
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
-<div id="total-number-of-steps-taken-per-day" class="section level4">
-<h4>Total number of steps taken per day</h4>
 <p>(Use <code>dplyr</code> package to calculate the total number of steps taken per day).</p>
 <pre class="r"><code>library(dplyr)</code></pre>
-</div>
 <div id="make-a-histogram-of-the-total-number-of-steps-taken-each-day" class="section level4">
 <h4>Make a histogram of the total number of steps taken each day:</h4>
 <pre class="r"><code>actiStats&lt;-group_by(activityDS, date) %&gt;%
@@ -416,12 +413,13 @@ hist(actiStats$steps,
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##     0.0   588.8  1177.5  1177.5  1766.2  2355.0</code></pre>
 <pre class="r"><code>head(activityDS$interval, 40)</code></pre>
-<pre><code>##  [1]   0   5  10  15  20  25  30  35  40  45  50  55 100 105 110 115 120 125 130 135 140
-## [22] 145 150 155 200 205 210 215 220 225 230 235 240 245 250 255 300 305 310 315</code></pre>
+<pre><code>##  [1]   0   5  10  15  20  25  30  35  40  45  50  55 100 105 110 115 120 125 130
+## [20] 135 140 145 150 155 200 205 210 215 220 225 230 235 240 245 250 255 300 305
+## [39] 310 315</code></pre>
 <pre class="r"><code>tail(activityDS$interval, 40)</code></pre>
-<pre><code>##  [1] 2040 2045 2050 2055 2100 2105 2110 2115 2120 2125 2130 2135 2140 2145 2150 2155 2200
-## [18] 2205 2210 2215 2220 2225 2230 2235 2240 2245 2250 2255 2300 2305 2310 2315 2320 2325
-## [35] 2330 2335 2340 2345 2350 2355</code></pre>
+<pre><code>##  [1] 2040 2045 2050 2055 2100 2105 2110 2115 2120 2125 2130 2135 2140 2145 2150
+## [16] 2155 2200 2205 2210 2215 2220 2225 2230 2235 2240 2245 2250 2255 2300 2305
+## [31] 2310 2315 2320 2325 2330 2335 2340 2345 2350 2355</code></pre>
 <p>The <code>interval</code> variable is an integer going from 0 to 2355.<br />
 It looks like the (1 or) 2 left most digit(s) in it are the hour of the day and the 2 rightmost are the minutes (see how the next values after each xx55 is yy00 and not xx60?).<br />
 Which would mean that in fact, it is a time, going from 00:00 to 23:55</p>

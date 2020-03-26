@@ -33,7 +33,6 @@ activityDS<-read_csv("activity.zip")
 
 ## What is mean total number of steps taken per day?
 
-#### Total number of steps taken per day
 (Use `dplyr` package to calculate the total number of steps taken per day).  
 
 
@@ -54,7 +53,7 @@ hist(actiStats$steps,
      ylab = "number of days")
 ```
 
-![](PA1_template_files/figure-html/histogram total steps per day-1.png)<!-- -->
+![](PA1_template_files/figure-html/histogram_total_steps_per_day-1.png)<!-- -->
 
 
 #### Mean and median of the number of steps taken per day
@@ -89,8 +88,9 @@ head(activityDS$interval, 40)
 ```
 
 ```
-##  [1]   0   5  10  15  20  25  30  35  40  45  50  55 100 105 110 115 120 125 130 135 140
-## [22] 145 150 155 200 205 210 215 220 225 230 235 240 245 250 255 300 305 310 315
+##  [1]   0   5  10  15  20  25  30  35  40  45  50  55 100 105 110 115 120 125 130
+## [20] 135 140 145 150 155 200 205 210 215 220 225 230 235 240 245 250 255 300 305
+## [39] 310 315
 ```
 
 ```r
@@ -98,9 +98,9 @@ tail(activityDS$interval, 40)
 ```
 
 ```
-##  [1] 2040 2045 2050 2055 2100 2105 2110 2115 2120 2125 2130 2135 2140 2145 2150 2155 2200
-## [18] 2205 2210 2215 2220 2225 2230 2235 2240 2245 2250 2255 2300 2305 2310 2315 2320 2325
-## [35] 2330 2335 2340 2345 2350 2355
+##  [1] 2040 2045 2050 2055 2100 2105 2110 2115 2120 2125 2130 2135 2140 2145 2150
+## [16] 2155 2200 2205 2210 2215 2220 2225 2230 2235 2240 2245 2250 2255 2300 2305
+## [31] 2310 2315 2320 2325 2330 2335 2340 2345 2350 2355
 ```
 The `interval` variable is an integer going from 0 to 2355.  
 It looks like the (1 or) 2 left most digit(s) in it are the hour of the day and the 2 rightmost are the minutes (see how the next values after each xx55 is yy00 and not xx60?).  
@@ -117,7 +117,7 @@ hist(activityDS$interval, breaks = seq(0, 2400, by=5)-1, xaxt = "n", cex = 0.2,
 axis(1, at = seq(0, 2400, by=100), labels = seq(0, 2400, by=100)/100)
 ```
 
-![](PA1_template_files/figure-html/interval histo (not asked)-1.png)<!-- -->
+![](PA1_template_files/figure-html/(not_asked)_interval_histo-1.png)<!-- -->
   
 OK, so what we saw with `head` and `tail` is consistent across the whole data set.  
   
@@ -141,7 +141,7 @@ plot(x=actiPatt$time, y=actiPatt$steps, type="l",
 abline(v=actiPatt[actiPatt$steps==max(actiPatt$steps), ]$time)
 ```
 
-![](PA1_template_files/figure-html/average daily pattern-1.png)<!-- -->
+![](PA1_template_files/figure-html/average_daily_pattern-1.png)<!-- -->
   
 If we had directly plotted intervals on a numeric x-axis, we would have seen plateaus for all the non existent intervals, for example interval values between 1155 and 1200 (8 non-existent intervals each hour).  
 Plotting intervals on a time x-axis allow us to get rid of these plateaus and see the real time series.  
@@ -221,7 +221,7 @@ hist(actiNas$Nas, breaks = nrow(actiNas), col="blue",
      main = "Number of NAs per day (histogram)")
 ```
 
-![](PA1_template_files/figure-html/NA distrib (not asked)-1.png)<!-- -->
+![](PA1_template_files/figure-html/(not asked)_NA_distrib-1.png)<!-- -->
   
 Hey ! we have only 2 values:  
 
@@ -279,7 +279,7 @@ hist(actiNewStats$steps,
      xlab = "number of steps")
 ```
 
-![](PA1_template_files/figure-html/new histogram with filled NAs-1.png)<!-- -->
+![](PA1_template_files/figure-html/new_histogram_with_filled_NAs-1.png)<!-- -->
 
 #### new mean and median with the missing data filled in  
 
@@ -352,4 +352,4 @@ g<-ggplot(actiPanel, aes(x=time, y=steps)) +
 print(g)
 ```
 
-![](PA1_template_files/figure-html/weekdays panel plot-1.png)<!-- -->
+![](PA1_template_files/figure-html/weekdays_panel_plot-1.png)<!-- -->
