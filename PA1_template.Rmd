@@ -19,11 +19,12 @@ library(readr)
 
 activityDS<-read_csv("activity.zip")
 ```
-
-
+  
+  
+  
+  
 ## What is mean total number of steps taken per day?
 
-#### Total number of steps taken per day
 (Use `dplyr` package to calculate the total number of steps taken per day).  
 
 ```{r lib, message=FALSE}
@@ -32,7 +33,7 @@ library(dplyr)
 
 #### Make a histogram of the total number of steps taken each day: 
 
-```{r histogram total steps per day}
+```{r histogram_total_steps_per_day}
 actiStats<-group_by(activityDS, date) %>%
     summarise(steps=sum(steps, na.rm = TRUE))
 
@@ -47,11 +48,9 @@ hist(actiStats$steps,
 ```{r MMs}
 c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
 ```
-
-
-
-
-
+  
+  
+  
 ## What is the average daily activity pattern?
 We know that the intervals are 5 minutes apart, but what is the format of that variable?
 ```{r interval format}
@@ -66,7 +65,7 @@ It looks like the (1 or) 2 left most digit(s) in it are the hour of the day and 
 Which would mean that in fact, it is a time, going from 00:00 to 23:55
 
 Lets check it:
-```{r interval histo (not asked), fig.height=3, fig.width=6}
+```{r (not_asked)_interval_histo, fig.height=3, fig.width=6}
 hist(activityDS$interval, breaks = seq(0, 2400, by=5)-1, xaxt = "n", cex = 0.2,
      xlab = "interval/100", 
      ylab = "number of days",
@@ -82,7 +81,7 @@ Now we know how to make nice time series:
 * We convert interval into time (using the formatC function followed by a regexp)
 * We don't add to it the date variable, since we want an average daily activity pattern across all days. So the date has to be the same for every observation. We just taking today's date (it won't be displayed anyway).
 * (We are still removing NAs here)
-```{r average daily pattern}
+```{r average_daily_pattern}
 actiPatt<-group_by(activityDS, time = as.POSIXct(sub("(\\d{2})(\\d{2})", "\\1:\\2", 
                                                 formatC(activityDS$interval, 
                                                         width = 4, flag = "0")), 
@@ -105,6 +104,8 @@ let's pick-up the exact interval:
 ```{r max interval}
 c("maximum average activity at" = as.character(actiPatt[actiPatt$steps==max(actiPatt$steps), ]$time, "%H:%M"))
 ```
+  
+  
   
   
 ## Imputing missing values
@@ -134,7 +135,7 @@ So no missing observation (24 hours x 12 intervals/hour = 288 intervals each day
    
 #### Strategy for filling in all of the missing values
 Lets first have a look at the distribution of NAs:  
-```{r NA distrib (not asked)}
+```{r (not_asked)_NA_distrib}
 actiNas<-group_by(activityDS, date) %>%
     summarise(Nas=sum(is.na(steps)))
 hist(actiNas$Nas, breaks = nrow(actiNas), col="blue",
@@ -170,7 +171,7 @@ actiFilled[is.na(actiFilled$steps),]$steps<-0
 ```
 
 #### new histogram with the missing data filled in
-```{r new histogram with filled NAs}
+```{r new_histogram_with_filled_NAs}
 actiNewStats<-group_by(actiFilled, date) %>%
     summarise(steps=sum(steps))
 
@@ -192,6 +193,9 @@ c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
   
 As expected, they are exactly the same: when we removed the NAs, the daily average were already 0 for the days full of NAS!  
 This way, there is no impact on the estimates of the total daily number of steps.  
+   
+   
+   
    
 ## Are there differences in activity patterns between weekdays and weekends?
 #### New variable indicating whether a given date is a weekday or weekend day
@@ -218,7 +222,7 @@ actiPanel<-group_by(actiFilled,
 ```
 
 Panel plot, using ggplot2:
-```{r weekdays panel plot}
+```{r weekdays_panel_plot}
 library(ggplot2)
 
 g<-ggplot(actiPanel, aes(x=time, y=steps)) +
