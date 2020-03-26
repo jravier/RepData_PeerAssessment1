@@ -1,25 +1,238 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "jravier"
+date: "26/03/2020"
 output: 
-  html_document:
-    keep_md: true
+  html_document: 
+    keep_md: yes
+    self_contained: no
+    theme: sandstone
+    toc: yes
+    toc_depth: 2
 ---
 
 
 ## Loading and preprocessing the data
+Here is my code to load and transform the data.  
 
+Notice that I use the `read_csv` from `readr` package instead of the standard `read.csv`, which allow to:  
+
+* directly read from the zipped file inside the sip
+* assign right classes to columns (as seen from the output below)
+
+```{r load}
+library(readr)
+
+activityDS<-read_csv("activity.zip")
+```
 
 
 ## What is mean total number of steps taken per day?
 
+#### Total number of steps taken per day
+(Use `dplyr` package to calculate the total number of steps taken per day).  
+
+```{r lib, message=FALSE}
+library(dplyr)
+```
+
+#### Make a histogram of the total number of steps taken each day: 
+
+```{r total steps per day}
+actiStats<-group_by(activityDS, date) %>%
+    summarise(steps=sum(steps, na.rm = TRUE))
+
+hist(actiStats$steps, 
+     main = "number of steps taken each day (histogram)",
+     xlab = "number of steps",
+     ylab = "number of days")
+```
+
+
+#### Mean and median of the number of steps taken per day
+```{r MMs}
+c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
+```
+
+
+
 
 
 ## What is the average daily activity pattern?
+We know that the intervals are 5 minutes apart, but what is the format of that variable?
+```{r interval format}
+summary(activityDS$interval)
 
+head(activityDS$interval, 40)
 
+tail(activityDS$interval, 40)
+```
+The `interval` variable is an integer going from 0 to 2355.  
+It looks like the (1 or) 2 left most digit(s) in it are the hour of the day and the 2 rightmost are the minutes (see how the next values after each xx55 is yy00 and not xx60?).  
+Which would mean that in fact, it is a time, going from 00:00 to 23:55
 
+Lets check it:
+```{r interval histo, fig.height=3, fig.width=6}
+hist(activityDS$interval, breaks = seq(0, 2400, by=5)-1, xaxt = "n", cex = 0.2,
+     xlab = "interval/100", 
+     ylab = "number of days",
+     main = "distribution of the intervals (histogram)")
+
+axis(1, at = seq(0, 2400, by=100), labels = seq(0, 2400, by=100)/100)
+```
+  
+OK, so what we saw with `head` and `tail` is consistent across the whole data set.  
+  
+Now we know how to make nice time series:  
+
+* We convert interval into time (using the formatC function followed by a regexp)
+* We don't add to it the date variable, since we want an average daily activity pattern across all days. So the date has to be the same for every observation. We just taking today's date (it won't be displayed anyway).
+* (We are still removing NAs here)
+```{r average daily pattern}
+actiPatt<-group_by(activityDS, time = as.POSIXct(sub("(\\d{2})(\\d{2})", "\\1:\\2", 
+                                                formatC(activityDS$interval, 
+                                                        width = 4, flag = "0")), 
+                                            format="%H:%M")) %>%
+    summarise(steps=mean(steps, na.rm = TRUE))
+
+plot(x=actiPatt$time, y=actiPatt$steps, type="l",
+     xlab = "time of the day", 
+     ylab = "average number of steps",
+     main = "average daily activity pattern")
+abline(v=actiPatt[actiPatt$steps==max(actiPatt$steps), ]$time)
+```
+  
+If we had directly plotted intervals on a numeric x-axis, we would have seen plateaus for all the non existent intervals, for example interval values between 1155 and 1200 (8 non-existent intervals each hour).  
+Plotting intervals on a time x-axis allow us to get rid of these plateaus and see the real time series.  
+  
+#### Which 5-minute interval contains the maximum number of steps?
+On average across all the days in the data set, this interval looks to be a bit after 8:00 AM (See vertical line above).  
+let's pick-up the exact interval:
+```{r max interval}
+c("maximum average activity at" = as.character(actiPatt[actiPatt$steps==max(actiPatt$steps), ]$time, "%H:%M"))
+```
+  
+  
 ## Imputing missing values
+  
+#### Total number of missing values in the data set
 
+First, lets look for the NAs:  
+```{r summary}
+summary(activityDS)
+```
+So we have NAs only in the "steps" variable and their total number is 2304.  
+```{r proportion}
+c("proportion of NA"=sum(is.na(activityDS$steps))/dim(activityDS)[1])
+```
+So 13% of the observations are NAs.  
+  
+  
+Let's also check for any missing interval observations:  
+```{r missing obs}
+actiCount<-group_by(activityDS, date) %>%
+    summarise(intercount= n())
 
+summary(actiCount$intercount)
+```
+So no missing observation (24 hours x 12 intervals/hour = 288 intervals each day).  
+  
+   
+#### Strategy for filling in all of the missing values
+Lets first have a look at the distribution of NAs:  
+```{r NA distrib}
+actiNas<-group_by(activityDS, date) %>%
+    summarise(Nas=sum(is.na(steps)))
+hist(actiNas$Nas, breaks = nrow(actiNas), col="blue",
+     xlab = "number of NAs",
+     ylab = "number of days",
+     main = "Number of NAs per day (histogram)")
+```
+  
+Hey ! we have only 2 values:  
+```{r NA values}
+unique(actiNas$Nas)
+```
+  
+So this mean that we have only missing values for full days (288 intervals), but no missing values inside the other days.  
+  
+How many missing day?  
+```{r NA days}
+nrow(actiNas[actiNas$Nas==288,])
+nrow(actiNas[actiNas$Nas==288,]) / nrow(actiNas)
+```
+Our 13% again, of course!  
+   
+      
+So what strategy?  
+  
+We could replace those missing days by the average daily activity pattern calculated above, but this would be inventing data.  
+Let's just replace the missing values with 0 (which happens to be the same as replacing them with the mean/median for that day, since they are 0 as well...).  
 
+#### new data set with the missing data filled in
+```{r new dataset with filled NAs}
+actiFilled<-activityDS
+actiFilled[is.na(actiFilled$steps),]$steps<-0
+```
+
+#### new histogram with the missing data filled in
+```{r new histogram with filled NAs}
+actiNewStats<-group_by(actiFilled, date) %>%
+    summarise(steps=sum(steps))
+
+hist(actiNewStats$steps,
+     main = "number of steps taken each day (histogram)",
+     sub = "NAs replaced by daily average",
+     xlab = "number of steps")
+```
+
+#### new mean and median with the missing data filled in  
+```{r new mean and median with filled NAs}
+c("new mean"=mean(actiNewStats$steps), "new median"=median(actiNewStats$steps))
+```
+  
+Let' recall the old values with the NA removed:  
+```{r old MMs}
+c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
+```
+  
+As expected, they are exactly the same: when we removed the NAs, the daily average were already 0 for the days full of NAS!  
+This way, there is no impact on the estimates of the total daily number of steps.  
+   
 ## Are there differences in activity patterns between weekdays and weekends?
+#### New variable indicating whether a given date is a weekday or weekend day
+```{r weekdays}
+actiFilled$day<-factor(ifelse(format(actiFilled$date, format = "%u") %in% c(6,7), 
+                              "weekend",
+                              "weekday"))
+summary(actiFilled$day)
+```
+  
+(it's easier and more international to use directly the day of the week as a numeral, starting with Monday = 1)  
+   
+   
+#### Make a panel plot containing a time series plot   
+As before, we convert the interval values to time values before making the plot:  
+```{r new time serie}
+actiPanel<-group_by(actiFilled, 
+                    day, 
+                    time = as.POSIXct(sub("(\\d{2})(\\d{2})", "\\1:\\2", 
+                                          formatC(actiFilled$interval, 
+                                                  width = 4, flag = "0")), 
+                                      format="%H:%M")) %>%
+  summarise(steps=mean(steps))
+```
+
+Panel plot, using ggplot2:
+```{r panel plot}
+library(ggplot2)
+
+g<-ggplot(actiPanel, aes(x=time, y=steps)) +
+  labs(title ="average daily activity pattern", 
+       x="time of the day",
+       y = "average number of steps") + 
+  geom_line() +
+  facet_grid(day ~ .) +
+  scale_x_datetime(date_labels = "%H:%M")
+print(g)
+```
