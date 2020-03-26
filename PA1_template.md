@@ -1,8 +1,14 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "jravier"
+date: "26/03/2020"
 output: 
-  html_document:
-    keep_md: true
+  html_document: 
+    keep_md: yes
+    self_contained: no
+    theme: sandstone
+    toc: yes
+    toc_depth: 2
 ---
 
 
@@ -29,8 +35,10 @@ activityDS<-read_csv("activity.zip")
 ##   interval = col_double()
 ## )
 ```
-
-
+  
+  
+  
+  
 ## What is mean total number of steps taken per day?
 
 (Use `dplyr` package to calculate the total number of steps taken per day).  
@@ -53,7 +61,7 @@ hist(actiStats$steps,
      ylab = "number of days")
 ```
 
-![](PA1_template_files/figure-html/histogram_total_steps_per_day-1.png)<!-- -->
+![](figure/histogram_total_steps_per_day-1.png)<!-- -->
 
 
 #### Mean and median of the number of steps taken per day
@@ -66,11 +74,9 @@ c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
 ##     mean   median 
 ##  9354.23 10395.00
 ```
-
-
-
-
-
+  
+  
+  
 ## What is the average daily activity pattern?
 We know that the intervals are 5 minutes apart, but what is the format of that variable?
 
@@ -117,7 +123,7 @@ hist(activityDS$interval, breaks = seq(0, 2400, by=5)-1, xaxt = "n", cex = 0.2,
 axis(1, at = seq(0, 2400, by=100), labels = seq(0, 2400, by=100)/100)
 ```
 
-![](PA1_template_files/figure-html/(not_asked)_interval_histo-1.png)<!-- -->
+![](figure/(not_asked)_interval_histo-1.png)<!-- -->
   
 OK, so what we saw with `head` and `tail` is consistent across the whole data set.  
   
@@ -141,7 +147,7 @@ plot(x=actiPatt$time, y=actiPatt$steps, type="l",
 abline(v=actiPatt[actiPatt$steps==max(actiPatt$steps), ]$time)
 ```
 
-![](PA1_template_files/figure-html/average_daily_pattern-1.png)<!-- -->
+![](figure/average_daily_pattern-1.png)<!-- -->
   
 If we had directly plotted intervals on a numeric x-axis, we would have seen plateaus for all the non existent intervals, for example interval values between 1155 and 1200 (8 non-existent intervals each hour).  
 Plotting intervals on a time x-axis allow us to get rid of these plateaus and see the real time series.  
@@ -158,6 +164,8 @@ c("maximum average activity at" = as.character(actiPatt[actiPatt$steps==max(acti
 ## maximum average activity at 
 ##                     "08:35"
 ```
+  
+  
   
   
 ## Imputing missing values
@@ -221,7 +229,7 @@ hist(actiNas$Nas, breaks = nrow(actiNas), col="blue",
      main = "Number of NAs per day (histogram)")
 ```
 
-![](PA1_template_files/figure-html/(not_asked)_NA_distrib-1.png)<!-- -->
+![](figure/(not_asked)_NA_distrib-1.png)<!-- -->
   
 Hey ! we have only 2 values:  
 
@@ -279,7 +287,7 @@ hist(actiNewStats$steps,
      xlab = "number of steps")
 ```
 
-![](PA1_template_files/figure-html/new_histogram_with_filled_NAs-1.png)<!-- -->
+![](figure/new_histogram_with_filled_NAs-1.png)<!-- -->
 
 #### new mean and median with the missing data filled in  
 
@@ -305,6 +313,9 @@ c("mean"=mean(actiStats$steps), "median"=median(actiStats$steps))
   
 As expected, they are exactly the same: when we removed the NAs, the daily average were already 0 for the days full of NAS!  
 This way, there is no impact on the estimates of the total daily number of steps.  
+   
+   
+   
    
 ## Are there differences in activity patterns between weekdays and weekends?
 #### New variable indicating whether a given date is a weekday or weekend day
@@ -352,4 +363,4 @@ g<-ggplot(actiPanel, aes(x=time, y=steps)) +
 print(g)
 ```
 
-![](PA1_template_files/figure-html/weekdays_panel_plot-1.png)<!-- -->
+![](figure/weekdays_panel_plot-1.png)<!-- -->
