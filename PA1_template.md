@@ -221,7 +221,7 @@ hist(actiNas$Nas, breaks = nrow(actiNas), col="blue",
      main = "Number of NAs per day (histogram)")
 ```
 
-![](PA1_template_files/figure-html/(not asked)_NA_distrib-1.png)<!-- -->
+![](PA1_template_files/figure-html/(not_asked)_NA_distrib-1.png)<!-- -->
   
 Hey ! we have only 2 values:  
 
